@@ -1,5 +1,7 @@
 import {Builder, By, Capabilities, until, WebDriver, WebElement} from "selenium-webdriver";
+import { VoidExpression } from "typescript";
 const chromedriver = require("chromedriver")
+
 
 interface Options {
     driver?: WebDriver;
@@ -17,6 +19,7 @@ export class BasePage {
         if(options && options.url) this.url = options.url
     }
     async navigate(url?: string): Promise<void> {
+        await this.driver.manage().window().maximize();
         if (url) return await this.driver.get(url);
         else if (this.url) return await this.driver.get(this.url)
         else
@@ -24,7 +27,6 @@ export class BasePage {
             "BasePage.navigate() needs a url defined on the page objects, or one passed in."
         )
     }
-
     async getElement(elementBy: By): Promise<WebElement> {
         await this.driver.wait(until.elementLocated(elementBy));
         let element = await this.driver.findElement(elementBy);
@@ -44,5 +46,15 @@ export class BasePage {
     }
     async getAttribute(elementBy: By, attribute: string): Promise<string> {
         return (await this.getElement(elementBy)).getAttribute(attribute)
+    }   
+    async maximizeWindow(url: string): Promise<void> {
+        const driver: WebDriver = await new Builder().withCapabilities(Capabilities.chrome()).build();
+
+        try {
+            await driver.get(url);
+            await driver.manage().window().maximize();
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 }
